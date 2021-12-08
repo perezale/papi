@@ -1,0 +1,37 @@
+services:
+
+    
+  dep_server:
+    build:
+      context: .
+    ports:
+      - 50051:50051
+    command: "go run tests/go/dep_server/dep-server-test.go"
+
+  scan_server:
+    build:
+      context: .
+    ports:
+      - 50052:50052
+    command: "go run tests/go/scan_server/scan-server-test.go"
+
+  client:
+    build:
+      context: .
+    command: "go run tests/go/client/client-test.go"
+
+  caddy:
+    image: caddy:latest
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./index.html:/var/www/html/index.html
+#       - caddy_data:/data
+#       - caddy_config:/config
+
+# volumes:
+#   caddy_data:
+#     external: true
+#   caddy_config:
