@@ -34,7 +34,10 @@ import (
 	"log"
 	"time"
 
+	"crypto/tls"
+
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	common "github.com/scanoss/papi/api/commonv2"
 	deps "github.com/scanoss/papi/api/dependenciesv2"
@@ -49,8 +52,8 @@ const (
 )
 
 var (
-	d_addr = flag.String("d_addr", "localhost:50051", "dependency server to connec to")
-	s_addr = flag.String("s_addr", "localhost:50052", "scanning server to connect to")
+	d_addr = flag.String("d_addr", "grpc.scanoss.app:443", "dependency server to connec to")
+	s_addr = flag.String("s_addr", "grpc.scanoss.app:443", "scanning server to connect to")
 	name   = flag.String("name", defaultName, "Echo message")
 )
 
@@ -58,8 +61,9 @@ func main() {
 	flag.Parse()
 
 	fmt.Println("Hello, World!")
-
-	conn, err := grpc.Dial(*d_addr, grpc.WithInsecure()) // Set up a connection to the server.
+	creds := credentials.NewTLS( &tls.Config{ InsecureSkipVerify: true } )
+ 
+	conn, err := grpc.Dial(*d_addr, grpc.WithTransportCredentials( creds )) // Set up a connection to the server.
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -76,7 +80,7 @@ func main() {
 	}
 	log.Printf("Dependency Echo: %s", r.GetMessage())
 
-	conn2, err := grpc.Dial(*s_addr, grpc.WithInsecure()) // Set up a connection to the server.
+	conn2, err := grpc.Dial(*s_addr, grpc.WithTransportCredentials( creds )) // Set up a connection to the server.
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}

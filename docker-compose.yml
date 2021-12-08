@@ -1,0 +1,43 @@
+services:
+
+    
+  dep_server:
+    build:
+      context: .
+    ports:
+      - 50051:50051
+    command: "go run tests/go/dep_server/dep-server-test.go"
+
+  scan_server:
+    build:
+      context: .
+    ports:
+      - 50052:50052
+    command: "go run tests/go/scan_server/scan-server-test.go"
+
+  client:
+    build:
+      context: .
+    command: "go run tests/go/client/client-test.go"
+
+  webserver:
+    image: nginx:latest
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    volumes:
+      - ./docker/nginx/conf/:/etc/nginx/conf.d/:ro
+      - ./docker/certbot/www:/var/www/certbot/:ro
+      - ./docker/certbot/conf/:/etc/nginx/ssl/:ro
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./docker/certbot/www/:/var/www/certbot/:rw
+      - ./docker/certbot/conf/:/etc/letsencrypt/:rw
+
+  portainer:
+    image: portainer/portainer
+    ports:
+      - 8080:8080
